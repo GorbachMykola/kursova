@@ -1,0 +1,215 @@
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+CREATE TABLE `bill` (
+  `bill_id` int(11) NOT NULL,
+  `ordering_id` int(11) NOT NULL,
+  `price` float NOT NULL,
+  `deadline` date NOT NULL,
+  `date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+INSERT INTO `bill` (`bill_id`, `ordering_id`, `price`, `deadline`, `date`) VALUES
+(101, 31, 10000, '2021-05-25', '2021-06-15'),
+(102, 41, 1500, '2021-05-25', '2021-06-17'),
+(103, 51, 4000, '2021-05-30', '2021-07-20'),
+(104, 61, 380000, '2021-05-23', '2021-06-30'),
+(105, 71, 2000, '2021-05-24', '2021-06-18');
+
+
+
+CREATE TABLE `office` (
+  `office_id` int(11) NOT NULL,
+  `adress` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `counter_of_car` int(10) NOT NULL,
+  `auto_company_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+INSERT INTO `office` (`office_id`, `adress`, `counter_of_car`, `auto_company_id`) VALUES
+(11, 'Lviv, Zelena 108', 50, 1),
+(12, 'Lviv, Gorodotska 42', 40, 1),
+(13, 'Lviv, Sadova 110', 70, 1),
+(14, 'Lviv, Gorodotska 147', 120, 1),
+(15, 'Lviv, Mostova 3', 65, 1);
+
+
+
+--
+-- Структура таблиці `ordering`
+--
+
+CREATE TABLE `ordering` (
+  `ordering_id` int(11) NOT NULL,
+  `services_id` int(11) NOT NULL,
+  `deadline` date NOT NULL,
+  `price` float NOT NULL,
+  `date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+INSERT INTO `ordering` (`ordering_id`, `services_id`, `deadline`, `price`, `date`) VALUES
+(31, 21, '2021-06-30', 10000, '2021-05-26'),
+(41, 22, '2021-06-30', 1500, '2021-05-26'),
+(51, 23, '2021-06-18', 4000, '2021-05-24'),
+(61, 24, '2021-06-19', 380000, '2021-05-28'),
+(71, 25, '2021-06-23', 2000, '2021-05-28');
+
+
+
+
+CREATE TABLE `services` (
+  `services_id` int(11) NOT NULL,
+  `name` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `price` float NOT NULL,
+  `deadline` date NOT NULL,
+  `date` date NOT NULL,
+  `ofiice_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+INSERT INTO `services` (`services_id`, `name`, `price`, `deadline`, `date`, `ofiice_id`) VALUES
+(21, 'change_weels', 10000, '2-06-30', '2021-05-26', 11),
+(22, 'change_oil', 1500, '2021-06-30', '2021-05-26', 12),
+(23, 'restyling car', 4000, '2021-06-18', '2021-05-24', 13);
+
+
+
+
+CREATE TABLE `auto_company` (
+  `auto_company_id` int(11) NOT NULL,
+  `web-site` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name_of_company` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `adress` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+INSERT INTO `auto_company` (`auto_company_id`, `web-site`, `name_of_company`, `adress`) VALUES
+(1, 'www.lexus.com', 'lexus', 'Lviv,Patona 88');
+
+--
+-- Індекси збережених таблиць
+--
+
+--
+-- Індекси таблиці `bill`
+--
+ALTER TABLE `bill`
+  ADD PRIMARY KEY (`bill_id`),
+  ADD KEY `ordering_id` (`ordering_id`);
+
+--
+-- Індекси таблиці `office`
+--
+ALTER TABLE `office`
+  ADD PRIMARY KEY (`office_id`),
+  ADD KEY `auto_company_id` (`auto_company_id`);
+
+
+ALTER TABLE `ordering`
+  ADD PRIMARY KEY (`ordering_id`),
+  ADD KEY `services_id` (`services_id`);
+
+
+ALTER TABLE `services`
+  ADD PRIMARY KEY (`services_id`),
+  ADD KEY `ofiice_id` (`ofiice_id`);
+
+--
+-- Індекси таблиці `auto_company`
+--
+ALTER TABLE `auto_company`
+  ADD PRIMARY KEY (`auto_company_id`);
+
+
+ALTER TABLE `bill`
+  ADD CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`ordering_id`) REFERENCES `ordering` (`ordering_id`) ON UPDATE CASCADE;
+
+
+ALTER TABLE `office`
+  ADD CONSTRAINT `office_ibfk_1` FOREIGN KEY (`auto_company_id`) REFERENCES `auto_company` (`auto_company_id`) ON UPDATE CASCADE;
+
+--
+-- Обмеження зовнішнього ключа таблиці `ordering`
+--
+ALTER TABLE `ordering`
+  ADD CONSTRAINT `ordering_ibfk_1` FOREIGN KEY (`services_id`) REFERENCES `services` (`services_id`) ON UPDATE CASCADE;
+
+
+ALTER TABLE `services`
+  ADD CONSTRAINT `services_ibfk_1` FOREIGN KEY (`ofiice_id`) REFERENCES `office` (`office_id`) ON UPDATE CASCADE;
+COMMIT;
+
+
+1. SELECT * FROM `services`
+ORDER BY name;
+
+2. SELECT * FROM `services`
+ORDER BY price;
+
+
+3. SELECT `auto_company`.`adress`, `ordering`.`services_id`
+FROM `auto_company`
+	, `ordering`;
+
+4. SELECT `auto_company`.`web-site`, `bill`.`price`, `ordering`.`date`
+FROM `auto_company`
+	, `bill` 
+	LEFT JOIN `ordering` ON `bill`.`ordering_id` = `ordering`.`ordering_id`;
+
+5. SELECT `bill`.`deadline`, `office`.`counter_of_car`, `auto_company`.`adress`
+FROM `bill`
+	, `office` 
+	LEFT JOIN `auto_company` ON `office`.`auto_company_id` = `auto_company`.`auto_company_id`;
+6. SELECT `office`.`counter_of_car`, `bill`.`price`
+FROM `office`
+	, `bill`;
+
+7. SELECT `ordering`.`services_id`, `bill`.`price`
+FROM `ordering` 
+	LEFT JOIN `bill` ON `bill`.`ordering_id` = `ordering`.`ordering_id`;
+
+8. SELECT `office`.`adress`, `bill`.`price`, `bill`.`date`
+FROM `office`
+	, `bill`;
+
+9. SELECT `auto_company`.`web-site`, `office`.`counter_of_car`
+FROM `auto_company` 
+	LEFT JOIN `office` ON `office`.`auto_company_id` = `auto_company`.`auto_company_id`;
+
+10. SELECT `auto_company`.`web-site`, `services`.`services_id`, `ordering`.`ordering_id`
+FROM `auto_company`
+	, `services` 
+	LEFT JOIN `ordering` ON `ordering`.`services_id` = `services`.`services_id`;
+
+11. SELECT `bill`.`price`, `services`.`name`
+FROM `bill`
+	, `services`;
+
+12. SELECT `ordering`.`services_id`, `bill`.`deadline`, `bill`.`price`
+FROM `ordering` 
+	LEFT JOIN `bill` ON `bill`.`ordering_id` = `ordering`.`ordering_id`;
+
+13. SELECT `services`.`date`, `bill`.`price`
+FROM `services`
+	, `bill`;
+
+14. SELECT `services`.`name`, `office`.`adress`
+FROM `services` 
+	LEFT JOIN `office` ON `services`.`ofiice_id` = `office`.`office_id`;
+
+15. SELECT `ordering`.`price`, `bill`.`deadline`, `auto_company`.`name_of_company`
+FROM `ordering` 
+	LEFT JOIN `bill` ON `bill`.`ordering_id` = `ordering`.`ordering_id`
+	, `auto_company`;
+
+
